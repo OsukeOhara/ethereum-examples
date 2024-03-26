@@ -1,0 +1,61 @@
+<!--  https://github.com/ethereum/EIPs/blob/master/EIPS/eip-747.md
+      https://github.com/MetaMask/metamask-extension/blob/develop/app/scripts/controllers/preferences.js#L184
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://web3examples.com/lib/web3-browserify.js"></script>  
+        <script src="VeryBasicToken.abi"></script>  
+    </head>
+    <body>
+        <h1>VeryBasicToken Icon (Ropsten)</h1>
+        <pre id="log" style="width:100%;height:200px"></pre>
+        <script type="text/javascript">
+        function log(logstr) {   
+            document.getElementById("log").innerHTML +=logstr+"\n";
+        }
+        async function f() {         
+            web3 = new Web3(Web3.givenProvider); // provider from metamask         
+            web3.extend({ // web3.eth.requestAccounts() isn't available (yet)
+                methods: [{
+                    name: 'eth_requestAccounts',
+                    call: 'eth_requestAccounts',
+                    params: 0
+                }]
+            });
+            log(`Version of web3.js: ${web3.version}`);            
+            var result=await web3.eth_requestAccounts().catch(x=>log(x.message));
+            var acts=await web3.eth.getAccounts().catch(log);
+          
+            var VeryBasicTokenAddress="0x6e717970B902E29208d2b6fcFCa13594b3c37a89";  
+            var VeryBasicTokenContract=new web3.eth.Contract(VeryBasisTokenABI, VeryBasicTokenAddress);            
+            log(`Retrieving information from contract ${VeryBasicTokenAddress}`);
+            const name     = await VeryBasicTokenContract.methods.name()
+                .call({from: acts[0]}).catch(console.log);
+            const symbol   = await VeryBasicTokenContract.methods.symbol()
+                .call({from: acts[0]}).catch(console.log);
+            const decimals = await VeryBasicTokenContract.methods.decimals()
+                .call({from: acts[0]}).catch(console.log);
+            const url = new URL("VeryBasicTokenIcon.png",window.location.href);
+            log(`Adding icon for ${name} symbol ${symbol} decimals ${decimals}`);
+            log(`Image ${url.href}`);
+            const params={type:'ERC20',"options": {
+                "address":  VeryBasicTokenAddress,
+                "decimals": decimals,
+                "symbol":   symbol,
+                "decimals": decimals,
+                "image":    url.href
+                }
+            }
+            window.web3.currentProvider.sendAsync({
+                method: 'metamask_watchAsset',
+                params: params,
+                id: Math.round(Math.random() * 100000),
+            }, (err) => console.log(err) );
+        }
+        f();
+        </script>        
+    </body>
+</html>
+
+

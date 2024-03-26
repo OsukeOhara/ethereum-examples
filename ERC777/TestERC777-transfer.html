@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="shortcut icon" href="https://web3examples.com/logo.png">  
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <meta charset="UTF-8">  
+        <script src="https://cdn.jsdelivr.net/npm/babel-polyfill/dist/polyfill.min.js"></script>   
+        <script src="http://web3examples.com/ethereum/web3js/web3.min.js"></script>        
+    </head>
+<body>
+<h1>Demo ERC777</h1>
+Select Rinkeby
+<pre id="log" style="width:100%;height:200px"></pre> 
+<script>   
+      function log(str,...arguments) {        
+            var logstr=arguments.toString();
+            document.getElementById("log").innerHTML +=str+" "+logstr+"\n";
+        }      
+    async function asyncloaded() { 
+        await ethereum.enable();
+        web3 = new Web3(Web3.givenProvider);
+        var ERC777ABI = [
+/* transfer */  {"constant": false,"inputs": [{"name": "recipient","type": "address"},{"name": "amount","type": "uint256"}],"name": "transfer","outputs": [{"name": "","type": "bool"}],"payable": false,"stateMutability": "nonpayable","type": "function"},
+/* balanceOf */ {"constant": true,"inputs": [{"name": "account","type": "address"}],"name": "balanceOf","outputs": [{"name": "","type": "uint256"}],"payable": false,"stateMutability": "view","type": "function"},
+/* send */      {"constant": false,"inputs": [{"internalType": "address","name": "recipient","type": "address"},{"internalType": "uint256","name": "amount","type": "uint256"},{"internalType": "bytes","name": "data","type": "bytes"}],        "name": "send","outputs": [],"payable": false,"stateMutability": "nonpayable","type": "function"},
+/* DoneStuff */ {"anonymous": false,"inputs": [{"indexed": false,"internalType": "address","name": "operator","type": "address"},{            "indexed": false,"internalType": "address","name": "from","type": "address"},{"indexed": false,"internalType": "address","name": "to","type": "address"},{"indexed": false,"internalType": "uint256","name": "amount",            "type": "uint256"},{"indexed": false,"internalType": "bytes","name": "userData","type": "bytes"},{"indexed": false,"internalType": "bytes","name": "operatorData","type": "bytes"}],"name": "DoneStuff","type": "event"}
+        ];
+
+        const ERC777 = new web3.eth.Contract(ERC777ABI, "0x51a8e7fEC5639Eb6861a674E4F46148561d5c5c6");  // rinkeby
+        var nrCoins = 3;
+        console.log(web3.version);
+        
+        const transferAmountHex =   "0x"+web3.utils.toBN(nrCoins).mul(web3.utils.toBN(1e18)).toString('hex');;
+        console.log(transferAmountHex)
+        
+        var destAccount="0x12F9B77395aE87794A19Fba6dAf117C34A21E2c1";
+        accounts=await web3.eth.getAccounts(); 
+        var result = await ERC777.methods.balanceOf(destAccount).call({from: accounts[0]});        
+        log(`Account ${destAccount} now has: ${result}`);
+//        log(`Transfering ${amount} to ${destAccount}`);
+//        var result = await ERC777.methods.transfer(destAccount,amount).send({from: accounts[0]});
+        log(`Sending ${nrCoins} coins to ${destAccount}`);
+        var result = await ERC777.methods.send(destAccount,transferAmountHex,"0x77").send({from: accounts[0]});
+        var returnValues = result.events.DoneStuff.returnValues;
+        log(`Contract: ${returnValues.to} received tokens: ${returnValues.amount} data: ${returnValues.userData}`);
+        var result = await ERC777.methods.balanceOf(destAccount).call({from: accounts[0]});        
+        log(`Account ${destAccount} now has: ${result}`);
+    }
+    window.addEventListener('load', asyncloaded);  
+    </script>     
+</body>
+</html>

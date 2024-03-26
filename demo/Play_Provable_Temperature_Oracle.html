@@ -1,0 +1,36 @@
+<div id="ipfs">QmTD269GvohhmCK7KCvLnFTkXe4pH8DudW4MutmUCJ54wE</div>
+<div id="timetable">
+Location                                          | Action| Object      | Time
+Chrome                                            | Enter |             | 5
+https://ethereum-play.github.io/editor-solidity/
+Chrome(new tab)                                   | Enter |             | 17
+https://raw.githubusercontent.com/web3examples/ethereum/master/solidity_examples/ProvableTempOracle.sol
+Chrome (tab raw..)                                | Copy  | { Source }  | 25
+Chrome (tab editor..)                             | Paste | { Source }  | 30
+TempOracleContract                                | Click | Publish     | 43
+updatePrice                                       | Click | Arrow       | 86
+strLastLog                                        | Click | Arrow       | 115
+temp                                              | Click | Arrow       | 145
+updatePrice                                       | Click | Arrow       | 155
+strLastLog                                        | Click | Arrow       | 171
+priceOfUrl                                        | Click | Arrow       | 184
+priceOfUrl - 4058141225035610                     | Copy  | { Number }  | 187
+updatePrice - value                               | Paste | { Number }  | 194    
+updatePrice                                       | Click | Arrow       | 199
+strLastLog                                        | Click | Arrow       | 217
+temp                                              | Click | Arrow       | 270
+</div>
+<div id="goal">
+The goal is to test the Provable Oracle service, by doing a HTTP request to get the temperature.
+</div>
+<div id="explain">
+The test contract is deployed and temperature is retrieved.
+The second time the temperature is retrieved it turns out there is not sufficient ETH.
+After supplying ETH retrieving works again.
+Note1: sometimes a little extra ETH is required to get the transaction through.
+Note2: the network used is Goerli
+</div>
+<div id="prerequisites">
+Metamask installed and at least 0.1 Eth on Goerli account. Chrome is started.
+</div>
+<script src="showvideo.js"></script>

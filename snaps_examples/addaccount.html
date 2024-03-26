@@ -1,0 +1,47 @@
+<!-- First install the "snap" version of metamask from one of the following links:
+    https://github.com/MetaMask/metamask-snaps-beta/releases
+    https://github.com/NodeFactoryIo/metamask-snaps-beta/releases
+-->
+<!doctype html>
+<html>
+  <body>
+    <h1>MetaMask snap: add account</h1>    
+    <button class="add" id="add" onclick="add()">Add</button>
+    <pre id="log" style="width:100%;height:200px"></pre>
+  </body>
+  <script>
+    function log(logstr) {   
+            document.getElementById("log").innerHTML +=logstr+"\n";
+        }
+    async function add() {
+        var snap= // this is the code of the snap, that will run in the metamask environment
+        `    
+            const callparam={
+                method: 'wallet_manageIdentities',
+                params: [ 'add', { address: "0x0000000000000000000000000000000000000000"}]
+            }
+            await wallet.send(callparam)
+        `
+        var wrap=`async () => { ${snap} }` // wrap see https://github.com/MetaMask/snaps-cli
+        const blobsnap = new Blob([wrap], {type : 'application/javascript'});
+        var urlsnap=URL.createObjectURL(blobsnap)   // this is a link to the wrapped snap, so it can be loaded by metamask
+        var package={ // this is the source for the "package.json" that links to the snap and request premissions
+            "web3Wallet": {
+                "bundle": { "url": urlsnap }, // this is the link to the snap
+                "initialPermissions": { "wallet_manageIdentities": {} } // these are the permissions
+            }
+        }
+        var str=JSON.stringify(package, null, 4)
+        const blob = new Blob([str], {type : 'application/json'});
+        var url=URL.createObjectURL(blob) // this is a link to the package, which can be loaded by metamask
+        log(`${urlsnap}:<br>${wrap}`)
+        log(`${url}:<br>${str}`)
+        var cmd={ // install snap & get permissions
+            method: 'wallet_enable',
+            params: [{ wallet_plugin: { [url]: {} } }]
+        }
+        log(`ethereum.sendAsync:<br>${JSON.stringify(cmd, null, 4)}`)
+        await ethereum.sendAsync(cmd)
+    }
+  </script>
+</html>

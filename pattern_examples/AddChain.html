@@ -1,0 +1,126 @@
+<!--
+For standard chains you need wallet_switchEthereumChain 
+https://github.com/ethereum/EIPs/pull/3326
+https://ethereum-magicians.org/t/eip-3326-wallet-switchethereumchain/5471
+
+https://github.com/rekmarks/EIPs/blob/3326-create/EIPS/eip-3326.md
+
+-->
+
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://unpkg.com/web3@latest/dist/web3.min.js"></script> 
+    </head>
+    <body>
+        <h1>Add Chains to MetaMask</h1>
+        Also see <a href="https://chainlist.org">chainlist.org</a><br>
+        <input type="button" value="Add Rinkeby"  onclick="AddChain(paramrinkeby)"/>
+        <input type="button" value="Add xDai"  onclick="AddChain(paramxdai)"/>
+        <input type="button" value="Add Fantom"  onclick="AddChain(paramfantom)"/>
+        <input type="button" value="Switch main"  onclick="SwitchChain('0x1')"/>
+        <input type="button" value="Switch rinkeby"  onclick="SwitchChain('0x4')"/>
+        <input type="button" value="Switch goerli"  onclick="SwitchChain('0x5')"/>
+        <input type="button" value="Switch xdai"  onclick="SwitchChain('0x64')"/>
+         <pre id="log" style="width:100%;height:200px"></pre>
+        <script type="text/javascript">
+        function log(logstr) {   
+            document.getElementById("log").innerHTML +=logstr+"\n";
+        }
+        var paramxdai=
+          [
+            {
+              "chainId": "0x64",
+              "chainName": "xDAI Chain",
+              "rpcUrls": ["https://dai.poa.network"],
+              "iconUrls": [
+                "https://gblobscdn.gitbook.com/spaces%2F-Lpi9AHj62wscNlQjI-l%2Favatar.png?alt=media",
+              ],
+              "nativeCurrency": {
+                "name": "xDAI",
+                "symbol": "xDAI",
+                "decimals": 18
+              }
+            }
+          ]
+          
+        var paramfantom=
+          [
+            {
+              "chainId": "0xFA",
+              "chainName": "Fantom Opera",
+              "rpcUrls": ["https://rpc.fantom.network"],
+              "iconUrls": [ "https://fantom.foundation/wp-content/themes/fantom-web/images/fantom_logo_white_new.svg"
+              ],
+              "nativeCurrency": {
+                "name": "ftm",
+                "symbol": "FTM",
+                "decimals": 18
+              },
+              "blockExplorerUrls": [
+                "https://ftmscan.com/"
+              ]
+            }
+          ]        
+          
+          
+          var paramrinkeby=
+          [
+            {
+              "chainId": "0x4",
+              "chainName": "Rinkeby Network",
+              "rpcUrls": ["https://rinkeby.infura.io/v3/undefined"],
+              "nativeCurrency": {
+                "name": "rin",
+                "symbol": "RIN",
+                "decimals": 18
+              },
+              "blockExplorerUrls": [
+                "https://rinkeby.etherscan.io/"
+              ]
+            }
+          ]        
+          
+        function AddChain(param) {
+            ethereum.request({method: 'wallet_addEthereumChain',params: param }) ;
+         }
+        function SwitchChain(chainid) {
+           
+            var param=[
+              {
+                "chainId": chainid,
+                }
+              ]
+            console.log(param);
+            ethereum.request({method: 'wallet_switchEthereumChain',params: param }) ;
+         } 
+         
+        async function f() { 
+            web3 = new Web3(Web3.givenProvider); // provider from metamask         
+            await newChain()
+            await newActs()
+            ethereum.on('accountsChanged', newActs)
+            ethereum.on('chainChanged',    newChain);
+            ethereum.on('networkChanged',  newChain);  // depricated / still used in metamask mobile
+            ethereum.on('chainIdChanged',  newChain);  // depricated / temp workaround
+            ethereum.autoRefreshOnNetworkChange = false; // temp workaround  // doesn't work on metamask mobile
+           
+                        
+            var result=await web3.eth.requestAccounts().catch(x=>{log(x.message);console.log(x);});
+            
+            async function newChain(newchainId) {
+                var chainId=await web3.eth.getChainId();
+                var networkId=await web3.eth.net.getId();
+                log(`We are on chain: ${chainId} and network ${networkId}`);
+            }
+            async function newActs() { 
+                var acts=await web3.eth.getAccounts()
+                log(`We have accounts: ${JSON.stringify(acts)}`);
+            }
+        }
+        window.addEventListener('DOMContentLoaded', f);  
+        </script>
+    </body>
+</html>

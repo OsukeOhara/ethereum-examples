@@ -1,0 +1,2 @@
+gsn = require('@opengsn/gsn');
+

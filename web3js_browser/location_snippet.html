@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://unpkg.com/web3@latest/dist/web3.min.js"></script> 
+    </head>
+    <body>
+        <h1>Location snippet (select Rinkeby)</h1>
+        <pre id="log" style="width:100%;height:200px"></pre>
+        <script type="text/javascript">
+        function log(logstr) {   
+            document.getElementById("log").innerHTML +=logstr+"\n";
+        }
+        async function f() { 
+            web3 = new Web3(Web3.givenProvider); // provider from metamask         
+            var acts=await web3.eth.requestAccounts().catch(x=>log(x.message));
+            var dist=100;
+            DistanceHHSaddress="0x609F224c0c9405a1e7FD404114ca8A8606edC3a3"
+            DistanceHHSABI=[{"constant": false,"inputs": [{"name": "distance",
+                "type": "uint256"}],"name": "StoreDistanceHHS","outputs": [],
+                "payable": false,"stateMutability": "nonpayable","type": "function"}];            
+            const DistanceHHSContract=new web3.eth.Contract(DistanceHHSABI,DistanceHHSaddress);            
+            log(`Storing distance to HHS: distance=${dist} (hex:${web3.utils.toHex(dist)})`);
+            x=await DistanceHHSContract.methods.StoreDistanceHHS(dist)
+                .send({from: acts[0]}).catch((reason)=>log(`Cannnot do transaction ${reason}`));
+            log(`Transaction hash: ${x.transactionHash}`);
+        }
+        window.addEventListener('DOMContentLoaded', f);  
+        </script>        
+    </body>
+</html>

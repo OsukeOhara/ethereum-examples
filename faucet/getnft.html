@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="shortcut icon" href="https://web3examples.com/logo.png">  
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <meta charset="UTF-8">  
+                <script src="https://cdn.jsdelivr.net/npm/babel-polyfill@6.26.0/dist/polyfill.min.js"></script>   
+       <!--script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.1/dist/web3.min.js"></script--> 
+        <script src="https://web3examples.com/lib/web3-browserify.js"></script> 
+        
+    </head>
+<html>
+
+
+<style>
+.loader {
+  border: 8px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 8px solid #3498db;
+  width: 20px;
+  height: 20px;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+  text-align: center;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+<h1>Get Tokens</h1>
+<br>
+<div class="loader" id="spinner"  style="display:none">#</div>
+ <input type="button" id="get" value="Get Koios Token" style="border-radius: 10px;font-size : 30px;width: 200;height: 50;color:yellow;background-color:Green " class="primary" onclick="doTransferEth(addressFaucet,addressSelf,0.1)"/>
+
+<br>
+<pre id="log" style="width:100%;height:200px"></pre> 
+  
+ <script>   
+    const privateKey= '0x0da19552d21de3da01e4a5ff72f6722b9a86c78ee6c6a46e5cdcf0fb5a936110'; // note very insecure, but for test ETH this is usable
+    var addressFaucet = 0;
+    var addressSelf = 0;
+    const amount =0.1;
+    var network;
+
+    var contractAddress="0x8396d279d9bbaab19E2E442183ef438D50B54D75";
+
+    async function EtherscanLink(pref,link) {     
+       var nwType = await web3.eth.net.getNetworkType();
+       return `<a href="https://${nwType}.etherscan.io/${pref}/${link}" target="_blank" >${link}</a>`;
+    }
+    
+    function log(str,...arguments) {        
+        var logstr=arguments.toString();
+        document.getElementById("log").innerHTML +=str+" "+logstr+"\n";
+    }      
+
+    function precise(x) {
+      return Number.parseFloat(x).toFixed(5);
+    }
+
+
+ 
+ 
+ABI=[{"constant": false,"inputs": [{"name": "_to","type": "address"}],"name": "GiveToken","outputs": [{"name": "","type": "uint256"}
+        ],"payable": false,"stateMutability": "nonpayable","type": "function"}];
+   
+var  EIP721;
+   
+  
+totest="0xfec65abe091919645ad2dafaf28a0607f817056c";
+    
+    async function doTransferEth(address1,address2,maxValue) {
+    
+
+
+      document.getElementById("get").style.display = "none";
+      document.getElementById("spinner").style.display = "block";      
+  
+ 
+       var result = await EIP721.methods.GiveToken(addressSelf).send({from: addressFaucet,gas: 3000000 }).catch(x => log(`Error: ${x.code} ${x.message}`));
+ 
+      
+      document.getElementById("spinner").style.display = "none";
+     
+      document.getElementById("get").style.display = "block";          
+      console.log(result);
+      if (result) 
+          log(`Transaction: ${await EtherscanLink("tx",result.transactionHash)}`);
+       
+    }
+    
+   
+ 
+   
+ 
+   
+    
+    async function asyncloaded() {
+        if (typeof ethereum !== 'undefined') {
+      
+            await ethereum.enable().catch( (reason) => log('User rejected provider access',reason.message.substring(0,50)) )
+        
+        }
+        if ((typeof ethereum == 'undefined')&& !Web3.givenProvider) { // Checking if web3 is accessible
+            log("Web3 interface is not found. "+
+            "Please install <a href='https://metamask.io'>Metamask</a>"+
+            " or use <a href='https://www.opera.com/crypto'>Opera Crypto (android)");
+            return; // stop this function
+        }
+        web3 = new Web3(Web3.givenProvider || ethereum); // switch to version 1.0 when using metamask; provide web3 functions for Opera
+        //typeof web3 === 'undefined' || web3 == 'undefined'
+        log(`web3 is present: ${await web3.version}`); // note: use ` (back quote)
+        
+        
+        var chainId = await web3.eth.getChainId();
+        
+       
+        log (`Found chainid ${chainId}`);
+        
+        
+        const chainInfo = await fetch(`https://raw.githubusercontent.com/ethereum-lists/chains/master/_data/chains/${chainId}.json`);
+        const chainJson = await chainInfo.json();
+        console.log(chainJson);
+        
+        log(`Chain id: ${chainId} name: ${chainJson.name} shortname: ${chainJson.shortName} <a href="${chainJson.infoURL}" target="_blank" >more info</a>`);
+        
+        
+        
+        network = await web3.eth.net.getNetworkType().catch( (reason) => log(`Cannnot find network ${reason}`) );            
+        log(`Ethereum network: ${network}`) 
+        if (typeof network === 'undefined' || network == "main") 
+            { log("Please select a test network");return;}
+
+        
+        addressFaucet = web3.eth.accounts.privateKeyToAccount(privateKey).address; // vanity address: '0x111Eb30919a11DA63423cECC8424969A5cF18099': ~Web3            
+      console.log(privateKey);
+console.log(addressFaucet);
+     // addressFaucet="0x111Eb30919a11DA63423cECC8424969A5cF18099"
+    
+        
+        web3.eth.accounts.wallet.add(privateKey);
+        
+        console.log (addressFaucet);
+        var accounts=await web3.eth.getAccounts();
+        console.log(accounts);
+        addressSelf = accounts[0];
+        
+        log(`My own address: ${await EtherscanLink("address",addressSelf)}`);
+        log(`Faucet address: ${await EtherscanLink("address",addressFaucet)}`);
+        //document.getElementById("amount").value = precise(0.1).toString();
+        
+        
+        EIP721   = new web3.eth.Contract(ABI, contractAddress );
+        log('<br>');
+       log(`<a href="https://rinkeby.opensea.io" target="_blank" >Opensea</a>`);   
+   }     
+   window.addEventListener('load', asyncloaded);       
+
+  </script>     
+        
+</html>
